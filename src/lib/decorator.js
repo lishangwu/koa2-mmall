@@ -1,9 +1,11 @@
-const Router = require('koa-router')
-const { resolve } = require('path')
+const Router       = require('koa-router')
+const { resolve }  = require('path')
 const symbolPrefix = Symbol('prefix')
+const glob         = require('glob')
+const R            = require('ramda')
 
-const glob = require('glob')
-const R = require('ramda')
+import { ServerResponse } from '../common/ServerResponse'
+import {Const} from '../common/Const'
 
 const routerMap = new Map()
 function isArray(c) {
@@ -12,16 +14,16 @@ function isArray(c) {
 
 export class Route {
     constructor(app, apiPath) {
-        this.app = app
+        this.app     = app
         this.apiPath = apiPath
-        this.router = new Router()
+        this.router  = new Router()
     }
     init() {
         glob.sync(resolve(this.apiPath, './**/*.js')).forEach(require)
 
         for (let [conf, controller] of routerMap) {
             const controllers = isArray(controller)
-            const prefixPath = conf.target['prefixPath']
+            const prefixPath  = conf.target['prefixPath']
             if (prefixPath) {
                 prefixPath = normalizePath(prefixPath)
             }
@@ -78,7 +80,9 @@ const changeToArr = R.unless(R.is(Array), R.of)
 //concat：将两个数组合并成一个数组。
 export const Auth = function () {
     const middleware = async (ctx, next) => {
-        console.log('Auth :登陆信息已失效, 请重新登陆')
+        if(!ctx.session[Const.CURRENT_USER]){
+            return ctx.body = ServerResponse.createByErrorMessage('登陆信息已失效, 请重新登陆')
+        }
         await next()
     }
     return function (target, key, descriptor) {
@@ -90,27 +94,25 @@ export const Auth = function () {
     }
 }
 
-export const Required = function(rules){
-    const middleware = async(ctx, next) => {
-        
+export const Required = function (rules) {
+    const middleware = async (ctx, next) => {
+
         let errors = []
         R.forEachObjIndexed(
             (value, key) => {
-                errors = R.filter( i => !R.has(i,  ctx.request[key]) )(value)
+                errors = R.filter(i => !R.has(i, ctx.request[key]))(value)
             }
         )(rules)
 
-        if(errors.length){
-            return ctx.body = {
-                success:false,
-                code: 412,
-                err: `${errors.join(',')} is required`
-            }
+        if (errors.length) {
+            return ctx.body = ServerResponse.createByErrorMessage(`${errors.join(',')} is required`)
         }
 
+        ctx.body  = ctx.request.body || {}
+        ctx.query = ctx.request.query || {}
         await next()
     }
-    return function(target, key, descriptor){
-        target[key] = R.compose(R.concat(changeToArr(middleware)) ,changeToArr)(target[key])
+    return function (target, key, descriptor) {
+        target[key] = R.compose(R.concat(changeToArr(middleware)), changeToArr)(target[key])
     }
 }

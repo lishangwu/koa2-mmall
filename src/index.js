@@ -1,7 +1,7 @@
 const Koa = require('koa')
 const app = new Koa()
 
-const {resolve} = require('path')
+const { resolve } = require('path')
 const R = require('ramda')
 
 const MIDDLEWARES = [
@@ -24,10 +24,11 @@ const useMiddlewares = app => {
     )(MIDDLEWARES)
 }
 
+require('./db/model');
 
-;(async () => {
+; (async () => {
     await useMiddlewares(app)
-    app.listen(5000, ()=>{
+    app.listen(5000, () => {
         console.log(`listening port 5000...`);
     })
 })();

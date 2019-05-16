@@ -5,6 +5,8 @@
   "scripts": {
     "start": "node bin/www",
     "dev": "./node_modules/.bin/nodemon -w src --exec 'babel-node src --presets env'",
+    "dev2": "./node_modules/.bin/nodemon start.js",
+    "sequelize-auto": "./node_modules/.bin/sequelize-auto -o \"src/db/models\" -d mmall -h 47.93.97.5 -u root -p 3306 -x Pi3.14159 -e mysql",
     "prd": "pm2 start bin/www",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -22,7 +24,11 @@
     "koa-session": "^5.11.0",
     "koa-static": "^3.0.0",
     "koa-views": "^5.2.1",
-    "ramda": "^0.26.1"
+    "mysql": "^2.17.1",
+    "mysql2": "^1.6.5",
+    "ramda": "^0.26.1",
+    "sequelize": "^5.8.6",
+    "sequelize-values": "^1.1.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -34,6 +40,7 @@
     "babel-preset-env": "^1.7.0",
     "babel-preset-stage-0": "^6.24.1",
     "babel-runtime": "^6.26.0",
-    "nodemon": "^1.8.1"
+    "nodemon": "^1.8.1",
+    "sequelize-auto": "^0.4.29"
   }
 }

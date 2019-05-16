@@ -1,10 +1,8 @@
 const bodyParser = require('koa-bodyparser')
-const logger = require('koa-logger')
-const session = require('koa-session')
-
-// module.exports = app => {
-//     app.use(bodyParser())
-// }
+const logger     = require('koa-logger')
+const session    = require('koa-session')
+const R          = require('ramda')
+const Const      = require('../common/Const')
 
 export const addBodyParses = app => {
     app.use(bodyParser())
@@ -17,13 +15,28 @@ export const addLogger = app => {
 export const addSession = app => {
     app.keys = ['trailer']
     const CONFIG = {
-        key: 'koa:sess',
-        maxAge: 86400,
+        key      : 'koa:sess',
+        maxAge   : 86400,
         overwrite: true,
-        httpOnly: false,
-        signed: true,
-        rolling: false
+        httpOnly : false,
+        signed   : true,
+        rolling  : false
     }
-
     app.use(session(CONFIG, app))
+}
+
+export const addLogger2 = app => {
+    app.use(async(ctx, next)=>{
+        if(!R.equals(ctx.request.body)({})){
+            console.log('------------>  body : ', ctx.request.body);
+        }
+        if(!R.equals(ctx.request.query)({})){
+            console.log('------------>  query : ', ctx.request.query);
+        }
+        await next()
+        console.log('<<===========  ctx.body : ', JSON.stringify(ctx.body));
+        if(ctx.session[Const.CURRENT_USER]){
+            console.log('<<===========  session : ', ctx.session[Const.CURRENT_USER].username);
+        }
+    })
 }
