@@ -2,7 +2,8 @@ const crypto = require('crypto')
 
 const SECRET_KEY = 'sbsbsbsb'
 
-class MD5Util{
+class MD5Util {
+
     static md5(content) {
         return crypto.createHash('md5').update(content).digest('hex')
     }

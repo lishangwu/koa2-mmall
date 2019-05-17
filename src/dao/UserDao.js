@@ -1,5 +1,8 @@
+import { Const } from '../common'
+import { sequelize, Sequelize } from '../db/db'
+
+const Op = Sequelize.Op
 const model = require('../db/model')
-const { Const } = require('../common/Const')
 const User = model[Const.Entity.User]
 
 class UserDao {
@@ -9,6 +12,7 @@ class UserDao {
             where: [{ username: username }]
         })
     }
+
     async checkEmail(email) {
         return await User.count({
             where: [{ email: email }]
@@ -25,7 +29,7 @@ class UserDao {
         return await User.create(user)
     }
 
-    async selectByPrimaryKey(userid){
+    async selectByPrimaryKey(userid) {
         return await User.findOne({
             where: { id: userid }
         })
@@ -33,51 +37,51 @@ class UserDao {
 
     async updateByPrimaryKeySelective(user) {
         let set = {}
-        for(let attr in user){
-            if(user[attr]){
+        for (let attr in user) {
+            if (user[attr]) {
                 set[attr] = user[attr]
             }
         }
         set.update_time = new Date()
         return await User.update(
             set,
-            {where: {id: user.id}}
+            { where: { id: user.id } }
         )
     }
 
-    async updateByPrimaryKey(){
+    async updateByPrimaryKey() {
 
     }
 
-    async selectQuestionByUsername(username){
+    async selectQuestionByUsername(username) {
         return await User.findOne({
-            attributes:['question'],
+            attributes: ['question'],
             where: { username: username }
         })
     }
 
-    async checkAnswer(username,question,answer){
+    async checkAnswer(username, question, answer) {
         return await User.count({
             where: [{ username: username, question: question, answer: answer }]
         })
     }
 
-    async updatePasswordByUsername(username, passwordNew){
+    async updatePasswordByUsername(username, passwordNew) {
         return await User.update(
-            {password: passwordNew, update_time : new Date},
-            {where: {username: username}}
+            { password: passwordNew, update_time: new Date },
+            { where: { username: username } }
         )
     }
 
-    async checkPassword(password, userid){
+    async checkPassword(password, userid) {
         return await User.count({
             where: [{ password: password, id: userid }]
         })
     }
 
-    async checkEmailByUserId(email, userid){
+    async checkEmailByUserId(email, userid) {
         return await User.count({
-            where: [{ email: email, id: userid }]
+            where: [{ email: email, id: { [Op.ne]: userid } }]
         })
     }
 }

@@ -1,20 +1,11 @@
-const { ServerResponse } = require('../../common/ServerResponse')
+import { ServerResponse, Const } from '../../common'
+import { controller, get, post, all, Auth, Required } from '../../lib/decorator'
+import { UserService } from '../../service'
 
-const { Const } = require('../../common/Const')
-
-const {
-    controller,
-    get,
-    post,
-    all,
-    Auth,
-    Required
-} = require('../../lib/decorator')
-
-const { UserService } = require('../../service/user')
 const userService = new UserService()
+
 @controller('/user')
-export class userController {
+export class UserController {
 
     //####1.登录
     // /user/login.do
@@ -34,7 +25,7 @@ export class userController {
     //####2.注册 /user/register.do
     @post('/register.do')
     @Required({
-        body: ['username','password','email','phone','question','answer']
+        body: ['username', 'password', 'email', 'phone', 'question', 'answer']
     })
     async register(ctx, next) {
         let resigterResult = await userService.register(ctx.body)
@@ -44,7 +35,7 @@ export class userController {
     //####3.检查用户名是否有效
     @post('/check_valid.do')
     @Required({
-        body: ['str','type']
+        body: ['str', 'type']
     })
     async check_valid(ctx, next) {
         let checkResult = await userService.checkValid(ctx.body.str, ctx.body.type)
@@ -53,9 +44,9 @@ export class userController {
 
     //####4.获取登录用户信息 /user/get_user_info.do
     @all('/get_user_info.do')
-    async get_user_info(ctx, next){
+    async get_user_info(ctx, next) {
         let user = ctx.session[Const.CURRENT_USER]
-        if(user){
+        if (user) {
             return ctx.body = ServerResponse.createBySuccess(user)
         }
         ctx.body = ServerResponse.createByErrorMessage('用户未登录,无法获取当前用户信息')
@@ -66,7 +57,7 @@ export class userController {
     @Required({
         body: ['username']
     })
-    async forget_get_question(ctx, next){
+    async forget_get_question(ctx, next) {
         let result = await userService.selectQuestion(ctx.body.username)
         ctx.body = result
     }
@@ -75,20 +66,20 @@ export class userController {
     //正确的返回值里面有一个token，修改密码的时候需要用这个。传递给下一个接口
     @post('/forget_check_answer.do')
     @Required({
-        body: ['username','question','answer']
+        body: ['username', 'question', 'answer']
     })
-    async forget_check_answer(ctx, next){
-        let result = await userService.checkAnswer(ctx.body.username, ctx.body.question, ctx.body.answer )
+    async forget_check_answer(ctx, next) {
+        let result = await userService.checkAnswer(ctx.body.username, ctx.body.question, ctx.body.answer)
         ctx.body = result
     }
 
     //####7.忘记密码的重设密码 /user/forget_reset_password.do
     @post('/forget_reset_password.do')
     @Required({
-        body: ['username','passwordNew','forgetToken']
+        body: ['username', 'passwordNew', 'forgetToken']
     })
-    async forget_reset_password(ctx, next){
-        let result = await userService.forgetResetPassword(ctx.body.username, ctx.body.passwordNew, ctx.body.forgetToken )
+    async forget_reset_password(ctx, next) {
+        let result = await userService.forgetResetPassword(ctx.body.username, ctx.body.passwordNew, ctx.body.forgetToken)
         ctx.body = result
     }
 
@@ -96,10 +87,10 @@ export class userController {
     @post('/reset_password.do')
     @Auth()
     @Required({
-        body: ['passwordOld','passwordNew']
+        body: ['passwordOld', 'passwordNew']
     })
-    async reset_password(ctx, next){
-        let result = await userService.resetPassword(ctx.body.passwordOld, ctx.body.passwordNew, ctx.session[Const.CURRENT_USER] )
+    async reset_password(ctx, next) {
+        let result = await userService.resetPassword(ctx.body.passwordOld, ctx.body.passwordNew, ctx.session[Const.CURRENT_USER])
         ctx.body = result
     }
 
@@ -107,20 +98,20 @@ export class userController {
     @post('/update_information.do')
     @Auth()
     @Required({
-        body: ['email','phone','question','answer']
+        body: ['email', 'phone', 'question', 'answer']
     })
-    async update_information(ctx, next){
+    async update_information(ctx, next) {
         let user = ctx.session[Const.CURRENT_USER]
         let { email, phone, question, answer } = ctx.body
         let updateUser = { email, phone, question, answer }
-        let result = await userService.updateInformation(updateUser,user)
+        let result = await userService.updateInformation(updateUser, user)
         ctx.body = result
     }
 
     //####10.获取当前登录用户的详细信息，并强制登录 /user/get_information.do
     @post('/get_information.do')
     @Auth()
-    async get_information(ctx, next){
+    async get_information(ctx, next) {
         ctx.body = await userService.getInformation(ctx.session[Const.CURRENT_USER].id)
     }
 
