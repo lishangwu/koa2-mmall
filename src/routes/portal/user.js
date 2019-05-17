@@ -1,6 +1,6 @@
-const { ServerResponse } = require('../common/ServerResponse')
+const { ServerResponse } = require('../../common/ServerResponse')
 
-const { Const } = require('../common/Const')
+const { Const } = require('../../common/Const')
 
 const {
     controller,
@@ -9,9 +9,9 @@ const {
     all,
     Auth,
     Required
-} = require('../lib/decorator')
+} = require('../../lib/decorator')
 
-const { UserService } = require('../service/user')
+const { UserService } = require('../../service/user')
 const userService = new UserService()
 @controller('/user')
 export class userController {
