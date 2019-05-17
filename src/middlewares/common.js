@@ -27,6 +27,7 @@ export const addSession = app => {
 
 export const addLogger2 = app => {
     app.use(async(ctx, next)=>{
+        console.log('------------>  url : ', ctx.url);
         if(!R.equals(ctx.request.body)({})){
             console.log('------------>  body : ', ctx.request.body);
         }

@@ -5,7 +5,9 @@ const glob         = require('glob')
 const R            = require('ramda')
 
 import { ServerResponse } from '../common/ServerResponse'
-import {Const} from '../common/Const'
+import { Const } from '../common/Const'
+import { ResponseCode } from '../common/ResponseCode'
+
 
 const routerMap = new Map()
 function isArray(c) {
@@ -23,7 +25,7 @@ export class Route {
 
         for (let [conf, controller] of routerMap) {
             const controllers = isArray(controller)
-            const prefixPath  = conf.target['prefixPath']
+            let prefixPath  = conf.target['prefixPath']
             if (prefixPath) {
                 prefixPath = normalizePath(prefixPath)
             }
@@ -74,6 +76,20 @@ export const post = function (path) {
         routerMap.set(k, v)
     }
 }
+export const all = function (path) {
+    const conf = {
+        method: 'all',
+        path: normalizePath(path)
+    }
+    return function (target, key, descriptor) {
+        const k = {
+            target: target,
+            ...conf
+        }
+        const v = target[key]
+        routerMap.set(k, v)
+    }
+}
 
 const changeToArr = R.unless(R.is(Array), R.of)
 //compose：将多个函数合并成一个函数，从右到左执行。
@@ -81,7 +97,7 @@ const changeToArr = R.unless(R.is(Array), R.of)
 export const Auth = function () {
     const middleware = async (ctx, next) => {
         if(!ctx.session[Const.CURRENT_USER]){
-            return ctx.body = ServerResponse.createByErrorMessage('登陆信息已失效, 请重新登陆')
+            return ctx.body = ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.code, '用户未登录,无法获取当前用户信息,status=10,强制登录')
         }
         await next()
     }
@@ -105,7 +121,7 @@ export const Required = function (rules) {
         )(rules)
 
         if (errors.length) {
-            return ctx.body = ServerResponse.createByErrorMessage(`${errors.join(',')} is required`)
+            return ctx.body = ServerResponse.createByErrorCodeMessage( ResponseCode.ILLEGAL_ARGUMENT.code, `[ ${errors.join(', ')} ] is required`)
         }
 
         ctx.body  = ctx.request.body || {}
