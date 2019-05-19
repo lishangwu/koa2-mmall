@@ -14,10 +14,10 @@ const myconfig = {
     qiniu: {
         "bucket": "koa2-mmall",
         "video": "http://video.iblack7.com/",
-        "AK": "KcWF_Fu_ZLqb_RmSSsIRLaScdMAsph5gDyNlZncD",
-        "SK": "ZFcI0l4D6gMr_B4KwTdwLFuCtGopojJPOp7du6FD",
+        "AK": "**",
+        "SK": "**",
         //外链默认域名
-        "ExternalLinkDefaultDomainName": 'http://' + 'prqz4fd85.bkt.clouddn.com/',
+        "ExternalLinkDefaultDomainName": 'http://' + '**/',
     }
 
 }
