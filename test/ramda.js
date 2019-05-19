@@ -19,3 +19,4 @@ console.log(R.isEmpty([])) //true
 console.log(R.isEmpty({})) //true
 console.log(R.isEmpty(null)) //false
 console.log(R.isEmpty(undefined)) //false
+console.log(R.isEmpty(123));

@@ -17,7 +17,7 @@ const sequelize = new Sequelize(config.database, config.username, config.passwor
         collate   : 'utf8_general_ci',
         timestamps: false,
     },
-    logging: false,
+    logging: true,
 
 })
 

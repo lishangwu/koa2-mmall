@@ -1,6 +1,7 @@
 const fs   = require('fs')
 const path = require('path')
 const db   = require('./db')
+const sequelizePaginate = require('sequelize-paginate')
 
 let files    = fs.readdirSync(path.resolve(__dirname, './models'));
 let js_files = files.filter(f => {
@@ -10,8 +11,8 @@ let js_files = files.filter(f => {
 for (let f of js_files) {
     console.log(`import model from files ${f}...`);
     let name = f.substring(0, f.length - 3)
-    const Entity = db.sequelize.import(path.resolve(__dirname, './models', f))
-    Entity.beforeValidate((obj, options) => {
+    const MyModel = db.sequelize.import(path.resolve(__dirname, './models', f))
+    MyModel.beforeValidate((obj, options) => {
         let now = new Date()
         if (obj.isNewRecord) {
             console.log('will create entity...');
@@ -22,5 +23,6 @@ for (let f of js_files) {
             obj.update_time = now
         }
     });
-    module.exports[name] = Entity
+    sequelizePaginate.paginate(MyModel)
+    module.exports[name] = MyModel
 }
