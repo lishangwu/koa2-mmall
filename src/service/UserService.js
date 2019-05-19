@@ -37,8 +37,8 @@ class UserService {
 
         // user.password = md5(user.password)
 
-        let resultCount = await userDao.insert(user)
-        if (resultCount === 0) {
+        let rowResult = await userDao.insert(user)
+        if (!rowResult._options.isNewRecord) {
             return ServerResponse.createByErrorMessage("注册失败")
         }
 
@@ -163,6 +163,14 @@ class UserService {
         }
         user.password = ''
         return ServerResponse.createBySuccess(user)
+    }
+
+    checkAdminRole(user){
+        if(user !== null && user.role === Const.Role.ROLE_ADMIN){
+            return ServerResponse.createBySuccess()
+        }else{
+            return ServerResponse.createByError()
+        }
     }
 }
 

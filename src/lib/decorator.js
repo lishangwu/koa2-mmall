@@ -8,6 +8,8 @@ import { ServerResponse } from '../common/ServerResponse'
 import { Const } from '../common/Const'
 import { ResponseCode } from '../common/ResponseCode'
 
+import { UserService } from '../service';
+const userService = new UserService()
 
 const routerMap = new Map()
 function isArray(c) {
@@ -110,6 +112,26 @@ export const Auth = function () {
     }
 }
 
+export const AuthAdmin = function () {
+    const middleware = async (ctx, next) => {
+        if(!ctx.session[Const.CURRENT_USER]){
+            return ctx.body = ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.code, '用户未登录,无法获取当前用户信息,status=10,强制登录')
+        }
+        //是否是管理员
+        if(!userService.checkAdminRole(ctx.session[Const.CURRENT_USER]).isSuccess()){
+            return ctx.body = ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.code, '无权限操作,需要管理员权限')
+        }
+        await next()
+    }
+    return function (target, key, descriptor) {
+        target[key] = R.compose(
+            R.concat(changeToArr(middleware)),
+            changeToArr
+        )(target[key])
+        return descriptor
+    }
+}
+
 export const Required = function (rules) {
     const middleware = async (ctx, next) => {
 
@@ -122,6 +144,35 @@ export const Required = function (rules) {
 
         if (errors.length) {
             return ctx.body = ServerResponse.createByErrorCodeMessage( ResponseCode.ILLEGAL_ARGUMENT.code, `[ ${errors.join(', ')} ] is required`)
+        }
+
+        ctx.body  = ctx.request.body || {}
+        ctx.query = ctx.request.query || {}
+        await next()
+    }
+    return function (target, key, descriptor) {
+        target[key] = R.compose(R.concat(changeToArr(middleware)), changeToArr)(target[key])
+    }
+}
+/*
+* DefaultValue : {
+*   categoryId : 0
+* }
+* */
+export const DefaultValue = function (rules) {
+    const middleware = async (ctx, next) => {
+
+        for(let key in rules){
+            if(ctx.method === 'GET'){
+                if(!ctx.request.query[key]){
+                    ctx.request.query[key] = rules[key]
+                }
+            }
+            if(ctx.method === 'POST'){
+                if(!ctx.request.body[key]){
+                    ctx.request.body[key] = rules[key]
+                }
+            }
         }
 
         ctx.body  = ctx.request.body || {}

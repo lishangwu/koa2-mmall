@@ -1,6 +1,6 @@
 const R = require('ramda')
 
-console.log( R.equals({})({}) );
+// console.log( R.equals({})({}) );
 
 var obj = { id: 36,
     username: 'aa',
@@ -13,15 +13,9 @@ var obj = { id: 36,
     create_time: '2019-05-16T15:05:59.000Z',
     update_time: '2019-05-17T10:00:42.000Z'
 }
-
-for(let o in obj){
-    console.log(o, obj[o])
-}
-
-
-if(''){
-    console.log('sb')
-}else{
-    console.log('sb2')
-}
-
+console.log(R.isEmpty(0)) //false
+console.log(R.isEmpty('')) //true
+console.log(R.isEmpty([])) //true
+console.log(R.isEmpty({})) //true
+console.log(R.isEmpty(null)) //false
+console.log(R.isEmpty(undefined)) //false

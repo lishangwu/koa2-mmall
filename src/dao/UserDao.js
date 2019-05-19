@@ -29,9 +29,9 @@ class UserDao {
         return await User.create(user)
     }
 
-    async selectByPrimaryKey(userid) {
+    async selectByPrimaryKey(id) {
         return await User.findOne({
-            where: { id: userid }
+            where: { id: id }
         })
     }
 

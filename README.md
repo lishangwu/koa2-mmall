@@ -1,4 +1,4 @@
-# nodejs-mmall
+# koa2-mmall
 koa2 sequelize
 
 # babel-node: command not found
