@@ -6,6 +6,14 @@ class Const {
         ROLE_CUSTOMER: 0,   //普通用户
         ROLE_ADMIN   : 1    //管理员
     }
+
+    static PRICE_ASC_DESC(){
+        let set = new Set()
+        set.add('price_desc')
+        set.add('price_asc')
+        return set
+    }
+
     static Entity = {
         Cart      : 'mmall_cart',
         Category  : 'mmall_category',

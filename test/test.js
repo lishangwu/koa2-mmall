@@ -1,8 +1,6 @@
-var obj = {}
+let set = new Set()
 
-console.log(obj.name == null)
-console.log(undefined == null);
+set.add('asd')
+set.add('sb')
 
-if('0'){
-    console.log('sb');
-}
+console.log(set.has('asd'))

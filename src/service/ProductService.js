@@ -1,10 +1,13 @@
 import { ServerResponse, Const, TokenCache } from '../common'
 import { MD5Util, UUID } from '../utils'
-import { ProductDao } from '../dao'
+import { ProductDao, CategoryDao } from '../dao'
+import { CategoryService } from  './CategoryService'
 
 const R = require('ramda')
 const _ = require('lodash')
 const productDao = new ProductDao()
+const categoryDao = new CategoryDao()
+const categoryService = new CategoryService()
 
 export class ProductService {
 
@@ -73,5 +76,33 @@ export class ProductService {
         }
 
         return ServerResponse.createByErrorMessage("新增或更新产品参数不正确")
+    }
+
+    async getProductDetail(productId){
+        let result = await productDao.selectByPrimaryKey(productId)
+        if(result != null){
+            return ServerResponse.createBySuccess(result)
+        }
+        return ServerResponse.createByErrorMessage('产品已下架或者删除')
+    }
+
+    async getProductByKeywordCategory(keyword,categoryId,pageNum,pageSize,orderBy){
+        let category = await categoryDao.selectByPrimaryKey(categoryId);
+
+        if(category == null){
+            return ServerResponse.createBySuccess({})
+        }
+
+        let categoryIdList = ( await categoryService.selectCategoryAndChildrenById(category.id) ).data
+
+        let orderByArray = []
+        if(orderBy){
+            if(Const.PRICE_ASC_DESC().has(orderBy)){
+                orderByArray = orderBy.split("_");
+            }
+        }
+
+        let productList = await productDao.selectByNameAndCategoryIds(keyword,pageNum,pageSize, categoryIdList, orderByArray)
+        return ServerResponse.createBySuccess(productList)
     }
 }
