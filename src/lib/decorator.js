@@ -166,10 +166,12 @@ export const DefaultValue = function (rules) {
             if(ctx.method === 'GET'){
                 if(!ctx.request.query[key]){
                     ctx.request.query[key] = rules[key]
+                    ctx.request.body[key] = rules[key]
                 }
             }
             if(ctx.method === 'POST'){
                 if(!ctx.request.body[key]){
+                    ctx.request.query[key] = rules[key]
                     ctx.request.body[key] = rules[key]
                 }
             }
