@@ -14,9 +14,12 @@ var obj = { id: 36,
     update_time: '2019-05-17T10:00:42.000Z'
 }
 console.log(R.isEmpty(0)) //false
+
 console.log(R.isEmpty('')) //true
 console.log(R.isEmpty([])) //true
 console.log(R.isEmpty({})) //true
+
 console.log(R.isEmpty(null)) //false
 console.log(R.isEmpty(undefined)) //false
-console.log(R.isEmpty(123));
+
+console.log(R.isEmpty(123)); // false

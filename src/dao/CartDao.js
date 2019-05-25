@@ -76,6 +76,19 @@ class CartDao {
             where: {user_id: userId, product_id: productId}
         })
     }
+
+    async selectCheckedCartByUserId(userId){
+        return await Cart.findAll({
+            where: {
+                user_id: userId,
+                checked: Const.Cart.CHECKED
+            }
+        })
+    }
+
+    async deleteByPrimaryKey(id){
+        return await Cart.destroy({id: id})
+    }
 }
 
 module.exports = {

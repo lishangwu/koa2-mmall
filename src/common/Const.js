@@ -21,6 +21,42 @@ class Const {
         LIMIT_NUM_SUCCESS: 'LIMIT_NUM_SUCCESS'
     }
 
+    static ProductStatusEnum = {
+        ON_SALE: {
+            code: 1,
+            value: '在线'
+        }
+    }
+
+    static OrderStatusEnum = {
+        CANCELED : { code: 0, value: '已取消' },
+        NO_PAY : { code: 10, value: '未支付' },
+        PAID : { code: 20, value: '已付款' },
+        SHIPPED : { code:40, value: '已发货' },
+        ORDER_SUCCESS : { code: 50, value: '订单完成' },
+        ORDER_CLOSE : { code: 60, value: '订单关闭' },
+
+        codeOf : function (code) {
+            if(code === 0) {return Const.OrderStatusEnum.CANCELED}
+            if(code === 10) {return Const.OrderStatusEnum.NO_PAY}
+            if(code === 20) {return Const.OrderStatusEnum.PAID}
+            if(code === 40) {return Const.OrderStatusEnum.SHIPPED}
+            if(code === 50) {return Const.OrderStatusEnum.ORDER_SUCCESS}
+            if(code === 60) {return Const.OrderStatusEnum.ORDER_CLOSE}
+        }
+    }
+
+    static ftp_server_http_prefix = ''
+
+    static PaymentTypeEnum = {
+        ONLINE_PAY : { code: 1, value:'在线支付' },
+        codeOf : function (code) {
+            if(code === 1){
+                return Const.PaymentTypeEnum.ONLINE_PAY
+            }
+        }
+    }
+
     static Entity = {
         Cart      : 'mmall_cart',
         Category  : 'mmall_category',

@@ -46,6 +46,12 @@ class ShippingDao {
         })
     }
 
+    async selectByPrimaryKey(shipping_id){
+        return await Shipping.findOne({
+            where:{id: shipping_id}
+        })
+    }
+
 }
 
 module.exports = {
