@@ -14,6 +14,13 @@ class Const {
         return set
     }
 
+    static Cart = {
+        CHECKED : 1,
+        UN_CHECKED: 0,
+        LIMIT_NUM_FAIL: 'LIMIT_NUM_FAIL',
+        LIMIT_NUM_SUCCESS: 'LIMIT_NUM_SUCCESS'
+    }
+
     static Entity = {
         Cart      : 'mmall_cart',
         Category  : 'mmall_category',

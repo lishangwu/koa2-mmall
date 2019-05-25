@@ -48,6 +48,10 @@ class ServerResponse {
     static createByErrorCodeMessage(errorCode, errorMessage) {
         return new ServerResponse(errorCode, ResponseCode.getDescByCode(errorCode), errorMessage)
     }
+
+    toString(){
+        return JSON.parse(JSON.stringify(this).replace(/_/g,''))
+    }
 }
 module.exports = {
     ServerResponse
