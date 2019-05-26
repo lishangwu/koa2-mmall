@@ -20,11 +20,10 @@ class CartDao {
     async updateByPrimaryKeySelective(cart){
         let set = {}
         for (let attr in cart) {
-            if (cart[attr]) {
+            if (cart[attr] !== '') {
                 set[attr] = cart[attr]
             }
         }
-        // set.update_time = new Date()
         return await Cart.update(
             set,
             { where: { id: cart.id } }
@@ -87,7 +86,9 @@ class CartDao {
     }
 
     async deleteByPrimaryKey(id){
-        return await Cart.destroy({id: id})
+        return await Cart.destroy({
+            where: {id :id}
+        })
     }
 }
 

@@ -38,11 +38,10 @@ class UserDao {
     async updateByPrimaryKeySelective(user) {
         let set = {}
         for (let attr in user) {
-            if (user[attr]) {
+            if (user[attr] !== '') {
                 set[attr] = user[attr]
             }
         }
-        set.update_time = new Date()
         return await User.update(
             set,
             { where: { id: user.id } }

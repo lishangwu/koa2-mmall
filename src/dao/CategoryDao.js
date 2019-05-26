@@ -20,11 +20,10 @@ class CategoryDao {
     async updateByPrimaryKeySelective(category){
         let set = {}
         for (let attr in category) {
-            if (category[attr]) {
+            if (category[attr] !== '') {
                 set[attr] = category[attr]
             }
         }
-        set.update_time = new Date()
         return await Category.update(
             set,
             { where: { id: category.id } }

@@ -54,6 +54,7 @@ export class ProductDao {
     }
 
     async selectByPrimaryKey(id) {
+        console.log('selectByPrimaryKey: ', id);
         return await Product.findOne({
             where: { id: id }
         })
@@ -62,11 +63,10 @@ export class ProductDao {
     async updateByPrimaryKeySelective(product) {
         let set = {}
         for (let attr in product) {
-            if (product[attr]) {
+            if (product[attr] !== '') {
                 set[attr] = product[attr]
             }
         }
-        set.update_time = new Date()
         return await Product.update(
             set,
             { where: { id: product.id } }

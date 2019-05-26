@@ -18,8 +18,9 @@ class OrderService {
 
     async createOrder(userId, shippingId) {
         let cartList = await cartDao.selectCheckedCartByUserId(userId)
-
-        //计算订单总价
+        // TODO
+        // cartList.length > 0 ? cartList = [cartList[0]] : ''
+        //把购物车里选中的产品 从产品库里拿出来封装数组
         let sp = await this.getCartOrderItem(userId, cartList)
         if (!sp.isSuccess()) {
             return sp
@@ -29,10 +30,12 @@ class OrderService {
         if (R.isEmpty(orderItemList)) {
             return ServerResponse.createByErrorMessage("购物车为空");
         }
+
+        //计算订单总价
         let payment = this.getOrderTotalPrice(orderItemList)
 
         //生成订单
-        let order = this.assembleOrder(userId, shippingId, payment)
+        let order = await this.assembleOrder(userId, shippingId, payment)
 
         if (order == null) {
             return ServerResponse.createByErrorMessage("生成订单错误")
@@ -52,7 +55,7 @@ class OrderService {
         await this.cleanCart(cartList);
 
         //返回给前端数据
-        let orderVo = this.assembleOrderVo(order, orderItemList);
+        let orderVo = await this.assembleOrderVo(order, orderItemList);
         return ServerResponse.createBySuccess(orderVo)
 
     }
@@ -89,29 +92,29 @@ class OrderService {
         return ServerResponse.createBySuccess( { total, orderVoList, pages } )
     }
 
-    async getOrderDetail(userid, orderNo){
-        let order = orderDao.selectByUserIdAndOrderNo(userId, orderNo)
+    async getOrderDetail(userId, orderNo){
+        let order = await orderDao.selectByUserIdAndOrderNo(userId, orderNo)
+        console.log(order.dataValues);
         if(order != null){
-            let orderItemList = await orderItemDao.getByOrderNoUserId(orderNo, userid)
+            let orderItemList = await orderItemDao.getByOrderNoUserId(orderNo, userId)
             let orderVo = await this.assembleOrderVo(order, orderItemList)
             return ServerResponse.createBySuccess(orderVo)
         }
         return ServerResponse.createByErrorMessage('没有找到该订单')
     }
 
-    async cancel(userid, orderNo){
-        let order = orderDao.selectByUserIdAndOrderNo(userId, orderNo)
+    async cancel(userId, orderNo){
+        let order = await orderDao.selectByUserIdAndOrderNo(userId, orderNo)
         if(order == null){
             return ServerResponse.createByErrorMessage('该用户此订单不存在')
         }
         if(order.status != Const.OrderStatusEnum.NO_PAY.code){
-            return ServerResponse.createByErrorMessage('已付款,无法取消订单')
+            return ServerResponse.createByErrorMessage('已付款,无法取消订单 : ' + Const.OrderStatusEnum.codeOf(order.status).value)
         }
 
         let updateOrder = {}
         updateOrder.id = order.id
         updateOrder.status = Const.OrderStatusEnum.CANCELED.code
-
         let row = await orderDao.updateByPrimaryKeySelective(updateOrder)
         if(row > 0){
             return ServerResponse.createBySuccess();
@@ -128,7 +131,7 @@ class OrderService {
             }else{
                 orderItemList = await orderItemDao.getByOrderNoUserId(order.order_no, userId)
             }
-            let orderVo = this.assembleOrderVo(order, orderItemList)
+            let orderVo = await this.assembleOrderVo(order, orderItemList)
             orderVoList.push(orderVo)
         }
         return orderVoList
@@ -234,7 +237,7 @@ class OrderService {
     }
 
     async getCartOrderItem(userId, cartList) {
-
+        
         let orderItemList = []
 
         if (R.isEmpty(cartList)) {
@@ -244,6 +247,9 @@ class OrderService {
         for (let cartItem of cartList) {
             let orderItem = {}
             let product = await productDao.selectByPrimaryKey(cartItem.product_id)
+            if(product == null){
+                return ServerResponse.createByErrorMessage("产品 product.id :" + cartItem.product_id + " 不存在");
+            }
             if (Const.ProductStatusEnum.ON_SALE.code != product.status) {
                 return ServerResponse.createByErrorMessage("产品" + product.name + "不是在线售卖状态");
             }
@@ -257,7 +263,7 @@ class OrderService {
             orderItem.product_name = product.name
             orderItem.product_image = product.main_image
             orderItem.current_unit_price = product.price
-            orderItem.quantity = product.quantity
+            orderItem.quantity = cartItem.quantity
             orderItem.total_price = numeral(product.price).multiply(cartItem.quantity).value()
 
             orderItemList.push(orderItem)

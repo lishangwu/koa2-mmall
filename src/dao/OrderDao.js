@@ -9,7 +9,7 @@ class OrderDao {
 
 
     async insert(order){
-        return await OrderDao.create(order)
+        return await Order.create(order)
     }
 
     async selectByUserId(userId, pageNum,pageSize){
@@ -20,14 +20,14 @@ class OrderDao {
             order: [['id', 'ASC']],
             where: { user_id: userId }
         }
-        return { total, docs, pages } = await Order.paginate(options)
+        return await Order.paginate(options)
     }
 
     async selectByUserIdAndOrderNo(userId, orderNo){
-        return await OrderDao.findOne({
+        return await Order.findOne({
             where: {
                 user_id: userId,
-                order_id: orderNo
+                order_no: orderNo
             }
         })
     }
@@ -35,7 +35,7 @@ class OrderDao {
     async updateByPrimaryKeySelective(updateOrder){
         let set = {}
         for (let attr in updateOrder) {
-            if (product[attr]) {
+            if (updateOrder[attr] !== '') {
                 set[attr] = updateOrder[attr]
             }
         }

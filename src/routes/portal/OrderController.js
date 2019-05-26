@@ -22,8 +22,6 @@ export class OrderController {
         ctx.body = result
     }
 
-
-
     // ####2.获取订单的商品信息
     // /order/get_order_cart_product.do
     @all('/get_order_cart_product.do')
@@ -60,12 +58,12 @@ export class OrderController {
     @all('/detail.do')
     // @Auth()
     @Required({
-        body: ['orderNo']
+        query: ['orderNo']
     })
-    async list(ctx, next) {
+    async detail(ctx, next) {
         // let userid = ctx.session[Const.CURRENT_USER].id
         let userid = 36
-        let orderNo = ctx.body.orderNo
+        let orderNo = ctx.body.orderNo || ctx.query.orderNo
         let result = await orderService.getOrderDetail(userid, orderNo)
         ctx.body = result
     }
@@ -75,12 +73,12 @@ export class OrderController {
     @all('/cancel.do')
     // @Auth()
     @Required({
-        body: ['orderNo']
+        query: ['orderNo']
     })
-    async list(ctx, next) {
+    async cancel(ctx, next) {
         // let userid = ctx.session[Const.CURRENT_USER].id
         let userid = 36
-        let orderNo = ctx.body.orderNo
+        let orderNo = ctx.body.orderNo || ctx.query.orderNo
         let result = await orderService.cancel(userid, orderNo)
         ctx.body = result
     }
@@ -110,7 +108,7 @@ export class OrderController {
     })
     async query_order_pay_status(ctx, next) {
         // let userid = ctx.session[Const.CURRENT_USER].id
-        let userid = 36
+        let userid = 36;
     }
 
     // ####3.支付宝回调

@@ -9,7 +9,7 @@ class OrderItemDao {
 
 
     async batchInsert(orderItemList){
-        return await OrderItemDao.bulkCreate(orderItemList)
+        return await Order_item.bulkCreate(orderItemList)
     }
 
     async getByOrderNo(order_no){
