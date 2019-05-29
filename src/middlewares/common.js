@@ -1,4 +1,4 @@
-const bodyParser = require('koa-bodyparser')
+// const bodyParser = require('koa-bodyparser')
 const logger     = require('koa-logger')
 const session    = require('koa-session')
 const R          = require('ramda')
@@ -6,9 +6,9 @@ const Const      = require('../common/Const')
 const path = require('path')
 const koaBody = require('koa-body');
 
-export const addBodyParses = app => {
-    app.use(bodyParser())
-}
+// export const addBodyParses = app => {
+//     app.use(bodyParser())
+// }
 
 export const addLogger = app => {
     app.use(logger())
