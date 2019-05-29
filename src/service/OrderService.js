@@ -3,6 +3,11 @@ import { MD5Util, UUID, DateTimeUtil } from '../utils'
 import { OrderDao, CartDao, ProductDao, OrderItemDao, ShippingDao } from '../dao'
 import { OrderVo, ShippingVo, OrderItemVo, OrderProductVo } from "../vo";
 
+import { AliPayHelper } from '../AliPayHelper/AliPayHelper'
+import { get } from '../common/Request'
+
+import { FileService } from './FileService'
+
 const numeral = require('numeral')
 
 const R = require('ramda')
@@ -11,6 +16,7 @@ const cartDao = new CartDao()
 const productDao = new ProductDao()
 const orderItemDao = new OrderItemDao()
 const shippingDao = new ShippingDao()
+const fileService = new FileService()
 
 
 
@@ -94,7 +100,6 @@ class OrderService {
 
     async getOrderDetail(userId, orderNo){
         let order = await orderDao.selectByUserIdAndOrderNo(userId, orderNo)
-        console.log(order.dataValues);
         if(order != null){
             let orderItemList = await orderItemDao.getByOrderNoUserId(orderNo, userId)
             let orderVo = await this.assembleOrderVo(order, orderItemList)
@@ -275,6 +280,48 @@ class OrderService {
     generateOrderNo() {
         let currentTime = Date.now()
         return currentTime + Math.floor(Math.random() * 100)
+    }
+
+
+
+
+
+
+
+
+    async pay(orderNo, userId){
+        let order = await orderDao.selectByUserIdAndOrderNo(userId, orderNo)
+        if(order == null){
+            return ServerResponse.createByErrorMessage('用户没有该订单')
+        }
+
+        let out_trade_no = order.order_no
+        let subject = 'mmall扫码支付,订单号:' + order.order_no
+        let totalAmount = order.payment;
+        let  aliPayHelper = new AliPayHelper()
+        let url = aliPayHelper.buildParams(subject, out_trade_no, totalAmount)
+        let result = JSON.parse(await get(url))
+        let msg = result.alipay_trade_precreate_response.msg
+        
+        if(msg === 'Success'){
+
+            let qr_code = result.alipay_trade_precreate_response.qr_code
+            let uploadResult
+            try {
+                uploadResult = await fileService.uploadQr_code(qr_code, out_trade_no + '_r' + Date.now())
+            } catch (error) {
+                return ServerResponse.createByErrorMessage(error)
+            }
+            if(uploadResult.isSuccess){
+                return ServerResponse.createBySuccess({orderNo: out_trade_no, qrPath: uploadResult.data})
+            }
+            return ServerResponse.createByError(uploadResult)
+        }else{
+            return ServerResponse.createByErrorMessage(result.alipay_trade_precreate_response)
+        }
+
+
+
     }
 
 

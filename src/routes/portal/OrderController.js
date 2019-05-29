@@ -92,11 +92,14 @@ export class OrderController {
     @all('/pay.do')
     // @Auth()
     @Required({
-        body: ['orderNo']
+        query: ['orderNo']
     })
     async pay(ctx, next) {
         // let userid = ctx.session[Const.CURRENT_USER].id
         let userid = 36
+        let orderNo = ctx.body.orderNo || ctx.query.orderNo
+        let result = await orderService.pay(orderNo, userid)
+        ctx.body = result
     }
 
     //####2.查询订单支付状态

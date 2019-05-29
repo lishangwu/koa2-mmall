@@ -14,10 +14,10 @@ const myconfig = {
     qiniu: {
         "bucket": "koa2-mmall",
         "video": "http://video.iblack7.com/",
-        "AK": "**",
-        "SK": "**",
+        "AK": "KcWF_Fu_ZLqb_RmSSsIRLaScdMAsph5gDyNlZncD",
+        "SK": "ZFcI0l4D6gMr_B4KwTdwLFuCtGopojJPOp7du6FD",
         //外链默认域名
-        "ExternalLinkDefaultDomainName": 'http://' + '**/',
+        "ExternalLinkDefaultDomainName": 'http://' + 'prqz4fd85.bkt.clouddn.com/',
     }
 
 }
@@ -89,9 +89,13 @@ const uploadFileToQiniu = function (myKey, myLocalFilePath) {
                 respBody.host = myconfig.qiniu.ExternalLinkDefaultDomainName
                 resolve(respBody)
             } else {
-                console.log(respInfo.statusCode);
-                console.log(respBody);
-                return reject(respInfo)
+                console.log('respInfo.statusCode: ', respInfo.statusCode);
+                console.log('respBody: ', respBody);
+                return reject({
+                    from: 'uploadFileToQiniu',
+                    statusCode: respInfo.statusCode,
+                    data: respBody
+                })
             }
         });
     })
@@ -119,9 +123,13 @@ const readableStreamUpload = function (key, readableStream) {
                 respBody.host = myconfig.qiniu.ExternalLinkDefaultDomainName
                 resolve(respBody)
             } else {
-                console.log(respInfo.statusCode);
-                console.log(respBody);
-                return reject(respInfo)
+                console.log('respInfo.statusCode: ', respInfo.statusCode);
+                console.log('respBody: ', respBody);
+                return reject({
+                    from: 'readableStreamUpload',
+                    statusCode: respInfo.statusCode,
+                    data: respBody
+                })
             }
         });
     })

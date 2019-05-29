@@ -6,6 +6,8 @@ const _ = require('lodash')
 const fs = require('fs')
 const path = require('path')
 
+var qr = require('qr-image');
+
 export class FileService {
 
     async upload2(file){
@@ -37,6 +39,18 @@ export class FileService {
         const reader = fs.createReadStream(file.path);
         let key = Date.now() + file.name
         let qiniuResult = await qiniuStream( key, reader)
+        if(qiniuResult.key){
+            return ServerResponse.createBySuccess(qiniuResult.host + qiniuResult.key)
+        }else{
+            return ServerResponse.createByErrorMessage('上传失败')
+        }
+    }
+
+    async uploadQr_code(qr_code, orderNo){
+        let qr_png = qr.image(qr_code, { type: 'png' });
+        let qrFileName = 'qr_'+ orderNo +'.png'
+        // let reader = fs.createReadStream(new Buffer(qr_png))
+        let qiniuResult = await qiniuStream( qrFileName, qr_png)
         if(qiniuResult.key){
             return ServerResponse.createBySuccess(qiniuResult.host + qiniuResult.key)
         }else{
