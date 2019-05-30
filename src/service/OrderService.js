@@ -363,8 +363,58 @@ class OrderService {
         await payInfoDao.insert(payInfo)
 
         return ServerResponse.createBySuccess()
+    }
 
 
+
+
+
+
+
+    //backend
+    async manageList(pageNum,pageSize){
+        let {total, docs, pages} = await orderDao.selectAllOrder(pageNum,pageSize)
+        let orderVoList = await this.assembleOrderVoList(docs, null)
+        return ServerResponse.createBySuccess({total, orderVoList, pages})
+    }
+
+    async manageSearch(orderNo,pageNum,pageSize){
+        let order = await orderDao.selectByOrderNo(orderNo)
+        if(order != null){
+            let {total, docs, pages} = await orderDao.getByOrderNo(orderNo,pageNum,pageSize)
+            let orderVoList = await this.assembleOrderVoList(docs, null)
+            return ServerResponse.createBySuccess({total, orderVoList, pages})
+        }else{
+            return ServerResponse.createByErrorMessage("订单不存在");
+        }
+    }
+
+    async manageDetail(orderNo){
+        let order = await orderDao.selectByOrderNo(orderNo)
+        if(order != null){
+            let orderItemList = await orderItemDao.getByOrderNo(orderNo)
+            let orderVo = await this.assembleOrderVo(order, orderItemList)
+            return ServerResponse.createBySuccess(orderVo)
+        }else{
+            return ServerResponse.createByErrorMessage("订单不存在");
+        }
+    }
+
+    async manageSendGoods(orderNo){
+        let order = await orderDao.selectByOrderNo(orderNo)
+        if(order != null){
+            if(order.status == Const.OrderStatusEnum.PAID.code){
+                order.status = Const.OrderStatusEnum.SHIPPED.code
+                order.send_time = new Date()
+                // await orderDao.updateByPrimaryKeySelective(order)
+                await order.save()
+                return ServerResponse.createBySuccess('发货成功')
+            }else{
+                return ServerResponse.createByErrorMessage('发货失败 : ' + Const.OrderStatusEnum.codeOf(order.status).value)
+            }
+        }else{
+            return ServerResponse.createByErrorMessage("订单不存在");
+        }
     }
 
 

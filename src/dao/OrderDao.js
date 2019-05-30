@@ -51,6 +51,27 @@ class OrderDao {
         })
     }
 
+    async selectAllOrder(pageNum,pageSize){
+        const options = {
+            attributes: {exclude : ['create_time', 'update_time']},
+            page: Number(pageNum), // Default 1
+            paginate: Number(pageSize), // Default 25
+            order: [['id', 'ASC']],
+        }
+        return await Order.paginate(options)
+    }
+
+    async getByOrderNo(orderNo,pageNum,pageSize){
+        const options = {
+            attributes: {exclude : ['create_time', 'update_time']},
+            page: Number(pageNum), // Default 1
+            paginate: Number(pageSize), // Default 25
+            order: [['id', 'ASC']],
+            where: {order_no: orderNo}
+        }
+        return await Order.paginate(options)
+    }
+
 }
 
 module.exports = {
