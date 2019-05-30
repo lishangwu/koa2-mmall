@@ -315,13 +315,21 @@ class OrderService {
             if(uploadResult.isSuccess){
                 return ServerResponse.createBySuccess({orderNo: out_trade_no, qrPath: uploadResult.data})
             }
-            return ServerResponse.createByError(uploadResult)
+            return ServerResponse.createByErrorMessage(uploadResult)
         }else{
             return ServerResponse.createByErrorMessage(result.alipay_trade_precreate_response)
         }
+    }
 
-
-
+    async queryOrderPayStatus(orderNo, userId){
+        let order = await orderDao.selectByUserIdAndOrderNo(userId, orderNo)
+        if(order == null){
+            return ServerResponse.createByErrorMessage('用户没有该订单')
+        }
+        if(order.status >= Const.OrderStatusEnum.PAID.code){
+            return ServerResponse.createBySuccess()
+        }
+        return ServerResponse.createByError()
     }
 
 

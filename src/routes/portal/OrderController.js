@@ -107,11 +107,14 @@ export class OrderController {
     @all('/query_order_pay_status.do')
     // @Auth()
     @Required({
-        body: ['orderNo']
+        query: ['orderNo']
     })
-    async query_order_pay_status(ctx, next) {
+    async queryOrderPayStatus(ctx, next) {
         // let userid = ctx.session[Const.CURRENT_USER].id
         let userid = 36;
+        let orderNo = ctx.body.orderNo || ctx.query.orderNo
+        let result = await orderService.queryOrderPayStatus(orderNo, userid)
+        ctx.body = result
     }
 
     // ####3.支付宝回调
