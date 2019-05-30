@@ -33,7 +33,7 @@ export class OrderManageController {
         pageNum: 1,
         pageSize: 10
     })
-    async orderList(ctx, next) {
+    async search(ctx, next) {
         let orderNo = ctx.body.orderNo || ctx.query.orderNo
         let pageNum = Number(ctx.body.pageNum)
         let pageSize = Number(ctx.body.pageSize)
@@ -48,7 +48,7 @@ export class OrderManageController {
     @Required({
         query: ['orderNo']
     })
-    async orderList(ctx, next) {
+    async detail(ctx, next) {
         let orderNo = ctx.body.orderNo || ctx.query.orderNo
         let result = await orderService.manageDetail(orderNo)
         ctx.body = result
