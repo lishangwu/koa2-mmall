@@ -127,7 +127,8 @@ export class OrderController {
         let userid = 36
         console.log('alipay_callback : ' );
         console.info("支付宝回调,sign:{},trade_status:{},参数:{}");
-        console.log(ctx.body);
+        console.log(ctx.request.body);
+        console.log();
         console.log();
         ctx.body = Const.AlipayCallback.RESPONSE_FAILED
     }
