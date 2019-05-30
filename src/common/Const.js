@@ -65,6 +65,10 @@ class Const {
         RESPONSE_FAILED : "failed"
     }
 
+    static PayPlatformEnum = {
+        ALIPAY : {code: 1, value: '支付宝'}
+    }
+
     static Entity = {
         Cart      : 'mmall_cart',
         Category  : 'mmall_category',

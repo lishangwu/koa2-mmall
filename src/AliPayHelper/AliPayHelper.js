@@ -145,6 +145,7 @@ class AliPayHelper {
      * @returns {*}
      */
     verifySign(params) {
+        console.log('params : ', params.sign_type);
         try {
             let sign = params['sign'];//签名
             let signType = params['sign_type'];//签名类型

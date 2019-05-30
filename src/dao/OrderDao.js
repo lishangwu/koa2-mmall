@@ -45,6 +45,12 @@ class OrderDao {
         )
     }
 
+    async selectByOrderNo(orderNo){
+        return await Order.findOne({
+            where : {order_no: orderNo}
+        })
+    }
+
 }
 
 module.exports = {

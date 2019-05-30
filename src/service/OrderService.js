@@ -1,6 +1,6 @@
 import { ServerResponse, Const, TokenCache, ResponseCode } from '../common'
 import { MD5Util, UUID, DateTimeUtil } from '../utils'
-import { OrderDao, CartDao, ProductDao, OrderItemDao, ShippingDao } from '../dao'
+import { OrderDao, CartDao, ProductDao, OrderItemDao, ShippingDao, PayInfoDao } from '../dao'
 import { OrderVo, ShippingVo, OrderItemVo, OrderProductVo } from "../vo";
 
 import { AliPayHelper } from '../AliPayHelper/AliPayHelper'
@@ -17,7 +17,8 @@ const productDao = new ProductDao()
 const orderItemDao = new OrderItemDao()
 const shippingDao = new ShippingDao()
 const fileService = new FileService()
-
+const  aliPayHelper = new AliPayHelper()
+const payInfoDao = new PayInfoDao()
 
 
 class OrderService {
@@ -298,10 +299,9 @@ class OrderService {
         let out_trade_no = order.order_no
         let subject = 'mmall扫码支付,订单号:' + order.order_no
         let totalAmount = order.payment;
-        let  aliPayHelper = new AliPayHelper()
+        // let  aliPayHelper = new AliPayHelper()
         let url = aliPayHelper.buildParams(subject, out_trade_no, totalAmount)
         let result = JSON.parse(await get(url))
-        console.log('result: ', result)
         let msg = result.alipay_trade_precreate_response.msg
         
         if(msg || msg === 'Success'){
@@ -331,6 +331,40 @@ class OrderService {
             return ServerResponse.createBySuccess()
         }
         return ServerResponse.createByError()
+    }
+
+    rsaCheckV2(params){
+        return aliPayHelper.verifySign(params)
+    }
+
+    async aliCallback(params){
+        let orderNo = params['out_trade_no']
+        let tradeNo = params['trade_no']
+        let tradeStatus = params['trade_status']
+        let order = await orderDao.selectByOrderNo(orderNo)
+        if(order == null){
+            return ServerResponse.createByErrorMessage("非快乐慕商城的订单,回调忽略");
+        }
+        if(order.status >= Const.OrderStatusEnum.PAID.code){
+            return ServerResponse.createBySuccess("支付宝重复调用");
+        }
+        if(Const.AlipayCallback.TRADE_STATUS_TRADE_SUCCESS === tradeStatus){
+            order.payment_time = params['gmt_payment']
+            order.status = Const.OrderStatusEnum.PAID.code
+            // await orderDao.updateByPrimaryKeySelective(order)
+            order.save()
+        }
+        let payInfo = {}
+        payInfo.user_id = order.user_id
+        payInfo.order_no = order.order_no
+        payInfo.pay_platform = Const.PayPlatformEnum.ALIPAY.code
+        payInfo.platform_number = tradeNo
+        payInfo.platform_status = tradeStatus
+        await payInfoDao.insert(payInfo)
+
+        return ServerResponse.createBySuccess()
+
+
     }
 
 
