@@ -301,7 +301,7 @@ class OrderService {
         let  aliPayHelper = new AliPayHelper()
         let url = aliPayHelper.buildParams(subject, out_trade_no, totalAmount)
         let result = JSON.parse(await get(url))
-        console.log('result: ', result);
+        console.log('result: ', result)
         let msg = result.alipay_trade_precreate_response.msg
         
         if(msg || msg === 'Success'){
