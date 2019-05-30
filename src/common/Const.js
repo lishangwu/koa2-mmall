@@ -57,6 +57,14 @@ class Const {
         }
     }
 
+    static AlipayCallback = {
+        TRADE_STATUS_WAIT_BUYER_PAY : "WAIT_BUYER_PAY",
+        TRADE_STATUS_TRADE_SUCCESS : "TRADE_SUCCESS",
+
+        RESPONSE_SUCCESS : "success",
+        RESPONSE_FAILED : "failed"
+    }
+
     static Entity = {
         Cart      : 'mmall_cart',
         Category  : 'mmall_category',

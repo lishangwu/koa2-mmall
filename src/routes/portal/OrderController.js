@@ -122,12 +122,14 @@ export class OrderController {
     // /order/alipay_callback.do
     @all('/alipay_callback.do')
     // @Auth()
-    @Required({
-        // body:['orderNo']
-    })
     async alipay_callback(ctx, next) {
         // let userid = ctx.session[Const.CURRENT_USER].id
         let userid = 36
+        console.log('alipay_callback : ' );
+        console.info("支付宝回调,sign:{},trade_status:{},参数:{}");
+        console.log(ctx.body);
+        console.log();
+        ctx.body = Const.AlipayCallback.RESPONSE_FAILED
     }
 
 
