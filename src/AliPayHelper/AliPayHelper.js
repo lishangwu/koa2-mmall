@@ -64,6 +64,7 @@ class AliPayHelper {
         params.set('sign_type', config.sign_type);
         params.set('timestamp', moment().format('YYYY-MM-DD HH:mm:ss'));
         params.set('version', '1.0');
+        params.set('notify_url', 'http://47.93.97.5:5000/order/alipay_callback.do')
         params.set('biz_content', this._buildBizContent(subject, outTradeNo, totalAmount));
         params.set('sign', this._buildSign(params));
         let keys = Array.from(params.keys())
