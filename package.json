@@ -8,7 +8,8 @@
     "dev2": "./node_modules/.bin/nodemon start.js",
     "sequelize-auto": "./node_modules/.bin/sequelize-auto -o \"src/db/models\" -d mmall -h 47.93.97.5 -u root -p 3306 -x Pi3.14159 -e mysql",
     "prd": "pm2 start bin/www",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "pm2": "pm2 start ecosystem.config.js"
   },
   "dependencies": {
     "debug": "^2.6.3",

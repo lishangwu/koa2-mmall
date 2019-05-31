@@ -1,0 +1,14 @@
+{
+    "apps": [
+        {
+            "name": "koa2-mmall-pm2.json",
+            "script": "./start.js",
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "env_production": {
+                "NODE_ENV": "production"
+            }
+        }
+    ]
+}
