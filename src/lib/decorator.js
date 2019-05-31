@@ -1,8 +1,8 @@
-const Router       = require('koa-router')
-const { resolve }  = require('path')
+const Router = require('koa-router')
+const { resolve } = require('path')
 const symbolPrefix = Symbol('prefix')
-const glob         = require('glob')
-const R            = require('ramda')
+const glob = require('glob')
+const R = require('ramda')
 
 import { ServerResponse } from '../common/ServerResponse'
 import { Const } from '../common/Const'
@@ -18,16 +18,16 @@ function isArray(c) {
 
 export class Route {
     constructor(app, apiPath) {
-        this.app     = app
+        this.app = app
         this.apiPath = apiPath
-        this.router  = new Router()
+        this.router = new Router()
     }
     init() {
         glob.sync(resolve(this.apiPath, './**/*.js')).forEach(require)
 
         for (let [conf, controller] of routerMap) {
             const controllers = isArray(controller)
-            let prefixPath  = conf.target['prefixPath']
+            let prefixPath = conf.target['prefixPath']
             if (prefixPath) {
                 prefixPath = normalizePath(prefixPath)
             }
@@ -40,148 +40,107 @@ export class Route {
     }
 }
 
-function normalizePath(path) {
-    return path.startsWith('/') ? path : `/${path}`
+const normalizePath = path => path.startsWith('/') ? path : `/${path}`
+
+export const controller = path => target => target.prototype['prefixPath'] = path
+
+const router = conf => (target, key, descriptor) => {
+    conf.path = normalizePath(conf.path)
+    const k = {
+        target: target,
+        ...conf
+    }
+    const v = target[key]
+    routerMap.set(k, v)
 }
 
-export const controller = function (path) {
-    return function (tartget) {
-        tartget.prototype['prefixPath'] = path
-    }
-}
+export const all = path => router({ method: 'all', path: path })
+export const get = path => router({ method: 'get', path: path })
+export const post = path => router({ method: 'post', path: path })
+export const put = path => router({ method: 'put', path: path })
+export const Delete = path => router({ method: 'Delete', path: path })
 
-export const get = function (path) {
-    const conf = {
-        method: 'get',
-        path: normalizePath(path)
-    }
-    return function (target, key, descriptor) {
-        const k = {
-            target: target,
-            ...conf
-        }
-        const v = target[key]
-        routerMap.set(k, v)
-    }
-}
-export const post = function (path) {
-    const conf = {
-        method: 'post',
-        path: normalizePath(path)
-    }
-    return function (target, key, descriptor) {
-        const k = {
-            target: target,
-            ...conf
-        }
-        const v = target[key]
-        routerMap.set(k, v)
-    }
-}
-export const all = function (path) {
-    const conf = {
-        method: 'all',
-        path: normalizePath(path)
-    }
-    return function (target, key, descriptor) {
-        const k = {
-            target: target,
-            ...conf
-        }
-        const v = target[key]
-        routerMap.set(k, v)
-    }
-}
 
-const changeToArr = R.unless(R.is(Array), R.of)
+const changeToArr = R.unless(
+    R.is(Array),
+    R.of
+)
 //compose：将多个函数合并成一个函数，从右到左执行。
 //concat：将两个数组合并成一个数组。
-export const Auth = function () {
-    const middleware = async (ctx, next) => {
-        if(!ctx.session[Const.CURRENT_USER]){
-            return ctx.body = ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.code, '用户未登录,无法获取当前用户信息,status=10,强制登录')
-        }
-        await next()
-    }
-    return function (target, key, descriptor) {
-        target[key] = R.compose(
-            R.concat(changeToArr(middleware)),
-            changeToArr
-        )(target[key])
-        return descriptor
-    }
+
+const convert = middleware => (target, key, descriptor) => {
+    target[key] = R.compose(
+        R.concat(changeToArr(middleware)),
+        changeToArr
+    )(target[key])
+    return descriptor
 }
 
-export const AuthAdmin = function () {
-    const middleware = async (ctx, next) => {
-        if(!ctx.session[Const.CURRENT_USER]){
-            return ctx.body = ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.code, '用户未登录,无法获取当前用户信息,status=10,强制登录')
+export const Auth = () => convert(async (ctx, next) => {
+    if (!ctx.session[Const.CURRENT_USER]) {
+        return ctx.body = ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.code, '用户未登录,无法获取当前用户信息,status=10,强制登录')
+    }
+    await next()
+})
+
+export const AuthAdmin = () => convert(async (ctx, next) => {
+    if (!ctx.session[Const.CURRENT_USER]) {
+        return ctx.body = ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.code, '用户未登录,无法获取当前用户信息,status=10,强制登录2')
+    }
+    //是否是管理员
+    if (!userService.checkAdminRole(ctx.session[Const.CURRENT_USER]).isSuccess()) {
+        return ctx.body = ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.code, '无权限操作,需要管理员权限')
+    }
+    await next()
+})
+
+export const Required = rules => convert(async (ctx, next) => {
+    let errors = []
+    R.forEachObjIndexed(
+        (value, key) => {
+            errors = R.filter(i => !R.has(i, ctx.request[key]))(value)
         }
-        //是否是管理员
-        if(!userService.checkAdminRole(ctx.session[Const.CURRENT_USER]).isSuccess()){
-            return ctx.body = ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.code, '无权限操作,需要管理员权限')
-        }
-        await next()
-    }
-    return function (target, key, descriptor) {
-        target[key] = R.compose(
-            R.concat(changeToArr(middleware)),
-            changeToArr
-        )(target[key])
-        return descriptor
-    }
-}
+    )(rules)
 
-export const Required = function (rules) {
-    const middleware = async (ctx, next) => {
-
-        let errors = []
-        R.forEachObjIndexed(
-            (value, key) => {
-                errors = R.filter(i => !R.has(i, ctx.request[key]))(value)
-            }
-        )(rules)
-
-        if (errors.length) {
-            return ctx.body = ServerResponse.createByErrorCodeMessage( ResponseCode.ILLEGAL_ARGUMENT.code, `[ ${errors.join(', ')} ] is required`)
-        }
-
-        ctx.body  = ctx.request.body || {}
-        ctx.query = ctx.request.query || {}
-        await next()
+    if (errors.length) {
+        return ctx.body = ServerResponse.createByErrorCodeMessage(ResponseCode.ILLEGAL_ARGUMENT.code, `[ ${errors.join(', ')} ] is required`)
     }
-    return function (target, key, descriptor) {
-        target[key] = R.compose(R.concat(changeToArr(middleware)), changeToArr)(target[key])
-    }
-}
+
+    ctx.body = ctx.request.body || {}
+    ctx.query = ctx.request.query || {}
+    await next()
+})
+
 /*
 * DefaultValue : {
 *   categoryId : 0
 * }
 * */
-export const DefaultValue = function (rules) {
-    const middleware = async (ctx, next) => {
+export const DefaultValue = rules => convert(async (ctx, next) => {
 
-        for(let key in rules){
-            if(ctx.method === 'GET'){
-                if(!ctx.request.query[key]){
-                    ctx.request.query[key] = rules[key]
-                    ctx.request.body[key] = rules[key]
-                }
-            }
-            if(ctx.method === 'POST'){
-                if(!ctx.request.body[key]){
-                    ctx.request.query[key] = rules[key]
-                    ctx.request.body[key] = rules[key]
-                }
+    ctx.query = {}
+    ctx.body = {}
+    for (let key in rules) {
+        if (ctx.method === 'GET') {
+            if (!ctx.request.query[key]) {
+                ctx.query[key] = rules[key]
+                ctx.body[key] = rules[key]
             }
         }
+        if (ctx.method === 'POST') {
+            if (!ctx.request.body[key]) {
+                ctx.query[key] = rules[key]
+                ctx.body[key] = rules[key]
+            }
+        }
+    }
+    await next()
+})
 
-        ctx.body  = ctx.request.body || {}
-        ctx.query = ctx.request.query || {}
-        await next()
-    }
-    return function (target, key, descriptor) {
-        target[key] = R.compose(R.concat(changeToArr(middleware)), changeToArr)(target[key])
-    }
-}
+let logTimes = 0
+export const Log = () => convert(async (ctx, next) => {
+    logTimes++
+    console.time(`${logTimes}: ${ctx.method} - ${ctx.url}`)
+    await next()
+    console.timeEnd(`${logTimes}: ${ctx.method} - ${ctx.url}`)
+})
