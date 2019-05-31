@@ -54,10 +54,10 @@ const router = conf => (target, key, descriptor) => {
     routerMap.set(k, v)
 }
 
-export const all = path => router({ method: 'all', path: path })
-export const get = path => router({ method: 'get', path: path })
-export const post = path => router({ method: 'post', path: path })
-export const put = path => router({ method: 'put', path: path })
+export const all    = path => router({ method: 'all', path: path })
+export const get    = path => router({ method: 'get', path: path })
+export const post   = path => router({ method: 'post', path: path })
+export const put    = path => router({ method: 'put', path: path })
 export const Delete = path => router({ method: 'Delete', path: path })
 
 
