@@ -1,10 +1,10 @@
-import { ServerResponse, Const, TokenCache, ResponseCode } from '../common'
+import { ServerResponse, Const, TokenCache, ResponseCode, Request } from '../common'
 import { MD5Util, UUID, DateTimeUtil } from '../utils'
 import { OrderDao, CartDao, ProductDao, OrderItemDao, ShippingDao, PayInfoDao } from '../dao'
 import { OrderVo, ShippingVo, OrderItemVo, OrderProductVo } from "../vo";
 
 import { AliPayHelper } from '../AliPayHelper/AliPayHelper'
-import { get } from '../common/Request'
+// import { get } from '../common/Request'
 
 import { FileService } from './FileService'
 
@@ -301,7 +301,7 @@ class OrderService {
         let totalAmount = order.payment;
         // let  aliPayHelper = new AliPayHelper()
         let url = aliPayHelper.buildParams(subject, out_trade_no, totalAmount)
-        let result = JSON.parse(await get(url))
+        let result = JSON.parse(await Request.get(url))
         let msg = result.alipay_trade_precreate_response.msg
         
         if(msg || msg === 'Success'){

@@ -105,6 +105,86 @@ function post(opt) {
 //     console.log(res);
 // })()
 
-module.exports = {
-    get, post
+
+class Request{
+    static get(opt){
+        let options,hp = http
+        if (type(opt) === 'Object') {
+            options = {
+                hostname: opt.host || 'localhost',
+                port: opt.port || 5000,
+                path: opt.path || '',
+                method: 'GET'
+            }
+        }else if(type(opt) === 'String'){
+            options = opt
+            const myURL = new URL(options);
+            if(myURL.protocol === 'https:'){
+                hp = https
+            }
+        }
+        return new Promise((resolve, reject) => {
+            let req = hp.request(options, res => {
+                res.setEncoding('utf8');
+                let d = ''
+                res.on('data', function (chunk) {
+                    d += (chunk)
+                });
+                res.on('end', function () {
+                    resolve(d.toString())
+                });
+            })
+            req.on('error', e => {
+                reject(e)
+            })
+            req.end()
+        })
+    }
+
+    static post(opt){
+        return new Promise((resolve, reject) => {
+    
+            const postData = querystring.stringify(opt.data);
+    
+            const options = {
+                hostname: opt.host || 'localhost',
+                port: opt.port || 5000,
+                path: opt.path || '/user/login.do',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Length': Buffer.byteLength(postData)
+                },
+            };
+    
+            const req = https.request(options, (res) => {
+                // console.log(`状态码: ${res.statusCode}`);
+                // console.log(`响应头: ${JSON.stringify(res.headers)}`);
+                res.setEncoding('utf8');
+                let data = ''
+                res.on('data', (chunk) => {
+                    // console.log(`响应主体: ${chunk}`);
+                    data += chunk
+                });
+                res.on('end', () => {
+                    // console.log('响应中已无数据');
+                    resolve(data.toString())
+                });
+            });
+    
+            req.on('error', (e) => {
+                // console.error(`请求遇到问题: ${e.message}`);
+                reject(e)
+            });
+    
+            // 将数据写入请求主体。
+            req.write(postData);
+            req.end();
+        })
+    }
 }
+
+module.exports = {
+    Request
+}
+
