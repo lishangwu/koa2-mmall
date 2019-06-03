@@ -4,7 +4,6 @@ import { OrderDao, CartDao, ProductDao, OrderItemDao, ShippingDao, PayInfoDao } 
 import { OrderVo, ShippingVo, OrderItemVo, OrderProductVo } from "../vo";
 
 import { AliPayHelper } from '../AliPayHelper/AliPayHelper'
-// import { get } from '../common/Request'
 
 import { FileService } from './FileService'
 
