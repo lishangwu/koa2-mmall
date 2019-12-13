@@ -36,7 +36,7 @@
     "nanoid": "^2.0.2",
     "node-cache": "^4.2.0",
     "node-uuid": "^1.4.8",
-    "npm": "^6.9.0",
+    "npm": "^6.13.4",
     "numeral": "^2.0.6",
     "properties-reader": "0.0.16",
     "qiniu": "^7.2.1",
